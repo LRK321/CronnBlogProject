@@ -10,17 +10,4 @@
   <ItemGroup>
     <PackageReference Include="Alturos.Yolo" Version="3.0.6-alpha" />
   </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="C:\Users\LRK\.nuget\packages\alturos.yolo\3.0.6-alpha\build\/../runtimes/win-x64/native/pthreadVC2.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="C:\Users\LRK\.nuget\packages\alturos.yolo\3.0.6-alpha\build\/../runtimes/win-x64/native/pthreadGC2.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Remove="C:\Users\LRK\.nuget\packages\alturos.yolo\3.0.6-alpha\build\/../runtimes/win-x64/native/opencv_world411.dll" />
-  </ItemGroup>
-
 </Project>
