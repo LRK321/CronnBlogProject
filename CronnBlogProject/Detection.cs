@@ -25,6 +25,11 @@ namespace CronnBlogProject
         {
             detect = true;
 
+            const int screenWidth = 1920;
+            const int screenHeight = 1080;
+            const int captureRegionWidth = 1200;
+            const int captureRegionHeight = 675;
+
             Console.WriteLine("Starting YOLO object detection ...");
             var gpuConfig = new GpuConfig();
             var yoloConfig =
@@ -33,40 +38,45 @@ namespace CronnBlogProject
             {
                 Console.WriteLine("Starting detection loop ...");
                 Stopwatch watch = new Stopwatch();
+                Rectangle capRegion = new Rectangle((screenWidth / 2) - (captureRegionWidth / 2),
+                    (screenHeight / 2) - (captureRegionHeight / 2), captureRegionWidth, 675);
                 while (detect)
                 {
                     watch.Restart();
-                    Rectangle capRegion = new Rectangle(1920 / 2 - 1200 / 2, 1080 / 2 - 675 / 2, 1200, 675);
                     Bitmap bmp = cap.CaptureRegion(capRegion);
 
                     byte[] jpgBytes = (byte[]) new ImageConverter().ConvertTo(bmp, typeof(byte[]));
-                    var items = yoloWrapper.Detect(jpgBytes);
+                    var detectedObjects = yoloWrapper.Detect(jpgBytes);
 
-                    using (Graphics g = Graphics.FromImage(bmp))
+                    using (Graphics capturedScreen = Graphics.FromImage(bmp))
                     {
-                        if (items.GetEnumerator().MoveNext())
+                        foreach (var detectedObject in detectedObjects)
                         {
-                            foreach (var item in items)
+                            Color color;
+                            switch (detectedObject.Type)
                             {
-                                Color color = Color.Black;
-                                switch (item.Type)
-                                {
-                                    case "player":
-                                        color = Color.LawnGreen;
-                                        break;
-                                    case "head_player":
-                                        color = Color.Red;
-                                        break;
-                                }
-
-                                g.DrawRectangle(new Pen(color), item.X, item.Y, item.Width, item.Height);
-                                g.DrawString(item.Type + "(" + Math.Round(item.Confidence * 100) + "%)",
-                                    new Font(FontFamily.GenericMonospace, 15), new SolidBrush(color), item.X, item.Y);
+                                case "player":
+                                    color = Color.LawnGreen;
+                                    break;
+                                case "head_player":
+                                    color = Color.Red;
+                                    break;
+                                default:
+                                    color = Color.Black;
+                                    break;
                             }
+
+                            capturedScreen.DrawRectangle(new Pen(color), detectedObject.X, detectedObject.Y,
+                                detectedObject.Width, detectedObject.Height);
+                            capturedScreen.DrawString(
+                                detectedObject.Type + "(" + Math.Round(detectedObject.Confidence * 100) + "%)",
+                                new Font(FontFamily.GenericMonospace, 15), new SolidBrush(color), detectedObject.X,
+                                detectedObject.Y);
                         }
 
                         watch.Stop();
-                        g.DrawString((1000 / watch.ElapsedMilliseconds) + "FPS (" + watch.ElapsedMilliseconds + "ms)",
+                        capturedScreen.DrawString(
+                            (1000 / watch.ElapsedMilliseconds) + "FPS (" + watch.ElapsedMilliseconds + "ms)",
                             new Font(FontFamily.GenericMonospace, 15), new SolidBrush(Color.LimeGreen), 10, 10);
                     }
 
